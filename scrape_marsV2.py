@@ -1,4 +1,3 @@
-
 # Import BeautifulSoup
 from bs4 import BeautifulSoup
 import requests
@@ -95,10 +94,14 @@ def scrape():
     tables
 
     df = tables[0]
-    df.columns = ['Facts', 'Values']
-    df.head()
-    mars_facts = df.to_html
+   
+    df = df.set_index(0).rename(columns={1: "value"})
+    del df.index.name
+    mars_facts = df.to_html(justify='left')
     mars_dict['mars_facts'] = mars_facts
+
+    #mars_facts = df.to_html
+    #mars_dict['mars_facts'] = mars_facts
 
 
     # MARS HEMISPHERES
@@ -120,17 +123,22 @@ def scrape():
 
     hemisphere_image_urls = []
     img_url = "https://astrogeology.usgs.gov"
+    
     # Iterate through each hemisphere
-    for hemisphere in hemispheres:
+    hemispheres = soup_marshemis.find_all('div', class_='item')
 
+    hemisphere_image_urls = []
+    # Iterate through each hemisphere
+    for i in range (0, len(hemispheres)):
+  
         hemis_dict ={}
-        hemis_dict['img_url'] = hemisphere.find('img')['src']
-        hemis_dict['img_url'] =  hemis_dict['img_url'].replace("'", '')
-        hemis_dict['title'] = hemisphere.find('h3').text
+        hemis_dict['title'] =browser.find_by_tag('h3')[i].text
+        browser.find_by_css('.thumb')[i].click()
+        hemis_dict['img_url'] = browser.find_by_text('Sample')['href']
+        browser.back()
+  
     
         hemisphere_image_urls.append(hemis_dict)
-
-    mars_dict['hemisphere_image_urls'] = hemisphere_image_urls
+        mars_dict['hemisphere_image_urls'] = hemisphere_image_urls
 
     return mars_dict
-
